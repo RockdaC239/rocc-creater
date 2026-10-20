@@ -1,0 +1,51 @@
+# 凭据
+.env
+.env.*
+!.env.example
+asr-key.txt
+**/*-key.txt
+cookies.txt
+cookies*.txt
+*.cookies
+
+# 本地创作资料默认不进入代码仓库
+/收件箱/
+/内容项目/
+/灵感选题/
+/历史归档/
+
+# 音视频、工程文件及大体积打包产物（不区分扩展名大小写）
+*.[mM][pP]4
+*.[mM][oO][vV]
+*.[mM]4[vV]
+*.[mM][kK][vV]
+*.[aA][vV][iI]
+*.[wW][eE][bB][mM]
+*.[mM][tT][sS]
+*.[mM]2[tT][sS]
+*.[wW][aA][vV]
+*.[mM][pP]3
+*.[mM]4[aA]
+*.[aA][aA][cC]
+*.[fF][lL][aA][cC]
+*.[aA][iI][fF]
+*.[aA][iI][fF][fF]
+*.[oO][gG][gG]
+*.[oO][pP][uU][sS]
+*.prproj
+*.aep
+*.drp
+*.fcpxml
+*.fcpbundle/
+*.zip
+*.7z
+*.rar
+*.tar
+*.gz
+
+# 系统与运行产物
+.DS_Store
+__pycache__/
+*.pyc
+*.log
+.venv/
