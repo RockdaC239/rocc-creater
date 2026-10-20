@@ -14,7 +14,7 @@
       <path d="M48 88H1152" stroke="#E8E8E8"/>
     </g>
     <g id="editorial-title">
-      <text x="48" y="209" font-size="116" font-weight="800" letter-spacing="-6" fill="#111111">ROCC.</text>
+      <text x="48" y="209" font-size="104" font-weight="800" letter-spacing="-6" fill="#111111">ROCC</text>
       <text x="52" y="285" font-size="58" font-weight="750" letter-spacing="-2" fill="#222222">创作工作台</text>
       <rect x="48" y="320" width="413" height="72" rx="4" fill="#FF5B12"/>
       <text x="66" y="371" font-size="43" font-weight="700" fill="#FFFFFF">让想法，有作品。</text>

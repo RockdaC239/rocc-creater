@@ -1,7 +1,7 @@
 <p align="center">
   <picture>
-    <source media="(prefers-reduced-motion: reduce)" srcset="./assets/readme/hero-rocc.svg">
-    <img src="./assets/readme/hero-rocc.gif" width="100%" alt="Rocc 创作工作台：橙白黑黄的创作桌面，叠放影像画幅、文字稿与灵感卡片，呈现影像、归档、研究和多端表达的建设方向。当前能力见正文。">
+    <source media="(prefers-reduced-motion: reduce)" srcset="./assets/readme/hero-rocc-compact.svg">
+    <img src="./assets/readme/hero-rocc-compact.gif" width="100%" alt="Rocc 创作工作台：橙白黑黄的创作桌面，叠放影像画幅、文字稿与灵感卡片，呈现影像、归档、研究和多端表达的建设方向。当前能力见正文。">
   </picture>
 </p>
 
