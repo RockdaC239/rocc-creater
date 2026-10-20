@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="640" viewBox="0 0 1200 640" role="img" aria-labelledby="title desc">
+  <title id="title">Rocc 创作工作台</title>
+  <desc id="desc">面向抖音、小红书和 X 的个人创作工作区。内容生产目标：素材到作品再到分发；灵感选题目标：灵感到选题再到内容。展示目标路径，当前剪辑暂缓，完整自动化待建设。</desc>
+  <rect width="1200" height="640" rx="24" fill="#F4F0E8"/>
+  <g font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif">
+    <g id="identity">
+      <path d="M64 55h44v28H64z M75 55v28 M97 55v28" fill="none" stroke="#B44D32" stroke-width="3"/>
+      <text x="126" y="78" font-size="23" font-weight="600" letter-spacing="3" fill="#B44D32">ROCC / CREATOR’S DESK</text>
+      <text x="64" y="175" font-size="72" font-weight="700" letter-spacing="-2" fill="#242E2C">Rocc 创作工作台</text>
+      <text x="66" y="228" font-size="30" fill="#56635F">把素材变成作品，把观察变成选题。</text>
+      <text x="1136" y="76" font-size="24" text-anchor="end" fill="#56635F">抖音 · 小红书 · X</text>
+    </g>
+    <path d="M64 269H1136" stroke="#CBC8BE" stroke-width="2"/>
+    <g id="production-path">
+      <text x="64" y="314" font-size="22" fill="#56635F">01 / 内容生产 · 目标路径</text>
+      <rect x="64" y="337" width="296" height="92" rx="12" fill="#E9E1D5"/>
+      <rect x="452" y="337" width="296" height="92" rx="12" fill="#B44D32"/>
+      <rect x="840" y="337" width="296" height="92" rx="12" fill="#E9E1D5"/>
+      <g font-size="48" font-weight="600" text-anchor="middle">
+        <text x="212" y="400" fill="#242E2C">素材</text>
+        <text x="600" y="400" fill="#FFFFFF">作品</text>
+        <text x="988" y="400" fill="#242E2C">分发</text>
+      </g>
+      <path d="M384 383h44m-12-12 12 12-12 12 M772 383h44m-12-12 12 12-12 12" fill="none" stroke="#B44D32" stroke-width="3"/>
+    </g>
+    <g id="idea-path">
+      <text x="64" y="476" font-size="22" fill="#56635F">02 / 灵感选题 · 目标路径</text>
+      <g font-size="44" font-weight="600" fill="#315F53" text-anchor="middle">
+        <text x="212" y="541">灵感</text>
+        <text x="600" y="541">选题</text>
+        <text x="988" y="541">内容</text>
+      </g>
+      <path d="M384 525h44m-12-12 12 12-12 12 M772 525h44m-12-12 12 12-12 12" fill="none" stroke="#315F53" stroke-width="3"/>
+    </g>
+    <path d="M64 575H1136" stroke="#CBC8BE" stroke-width="2"/>
+    <text x="64" y="612" font-size="22" fill="#56635F">素材留在本地 / 规范与工作流持续沉淀</text>
+    <text x="1136" y="612" font-size="22" text-anchor="end" fill="#56635F">当前能力见下方说明</text>
+  </g>
+</svg>
