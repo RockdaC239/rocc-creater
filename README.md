@@ -1,5 +1,8 @@
 <p align="center">
-  <img src="./assets/readme/hero.svg" width="100%" alt="Rocc 创作工作台：素材到作品再到分发，灵感到选题再到内容。图示为目标路径，当前能力见下方说明。">
+  <picture>
+    <source media="(prefers-reduced-motion: reduce)" srcset="./assets/readme/hero.svg">
+    <img src="./assets/readme/hero.gif" width="100%" alt="Rocc 创作工作台：橙白黑黄的创作桌面，叠放影像画幅、文字稿与灵感卡片，呈现影像、归档、研究和多端表达的建设方向。当前能力见正文。">
+  </picture>
 </p>
 
 从一期素材，到一份作品，再到多平台分发。面向 **抖音 · 小红书 · X** 的个人创作工作区。

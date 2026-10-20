@@ -1,39 +1,83 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="640" viewBox="0 0 1200 640" role="img" aria-labelledby="title desc">
-  <title id="title">Rocc 创作工作台</title>
-  <desc id="desc">面向抖音、小红书和 X 的个人创作工作区。内容生产目标：素材到作品再到分发；灵感选题目标：灵感到选题再到内容。展示目标路径，当前剪辑暂缓，完整自动化待建设。</desc>
-  <rect width="1200" height="640" rx="24" fill="#F4F0E8"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="680" viewBox="0 0 1200 680" role="img" aria-labelledby="title desc">
+  <title id="title">Rocc 创作工作台 — 让想法，有作品。</title>
+  <desc id="desc">橙、白、深灰和黄色组成的个人创作桌面。影像画幅、文字稿和选题便签叠放，表达影像制作、内容归档、灵感研究与多平台表达的建设方向。能力状态以 README 正文为准。</desc>
+  <defs>
+    <pattern id="media-hatch" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(35)"><path d="M0 0V8" stroke="#FFFFFF" stroke-opacity=".14" stroke-width="2"/></pattern>
+  </defs>
+  <rect width="1200" height="680" fill="#FFFFFF"/>
   <g font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', sans-serif">
-    <g id="identity">
-      <path d="M64 55h44v28H64z M75 55v28 M97 55v28" fill="none" stroke="#B44D32" stroke-width="3"/>
-      <text x="126" y="78" font-size="23" font-weight="600" letter-spacing="3" fill="#B44D32">ROCC / CREATOR’S DESK</text>
-      <text x="64" y="175" font-size="72" font-weight="700" letter-spacing="-2" fill="#242E2C">Rocc 创作工作台</text>
-      <text x="66" y="228" font-size="30" fill="#56635F">把素材变成作品，把观察变成选题。</text>
-      <text x="1136" y="76" font-size="24" text-anchor="end" fill="#56635F">抖音 · 小红书 · X</text>
+    <g id="brand">
+      <rect x="48" y="42" width="24" height="24" rx="3" fill="#FF5B12"/>
+      <path d="M54 48h12v12H54z" fill="none" stroke="#FFFFFF" stroke-width="2"/>
+      <text x="84" y="61" font-size="19" font-weight="650" letter-spacing="2" fill="#222222">ROCC / CREATIVE WORKSPACE</text>
+      <text x="1152" y="61" text-anchor="end" font-size="18" fill="#626262" letter-spacing="2">PERSONAL STUDIO</text>
+      <path d="M48 88H1152" stroke="#E8E8E8"/>
     </g>
-    <path d="M64 269H1136" stroke="#CBC8BE" stroke-width="2"/>
-    <g id="production-path">
-      <text x="64" y="314" font-size="22" fill="#56635F">01 / 内容生产 · 目标路径</text>
-      <rect x="64" y="337" width="296" height="92" rx="12" fill="#E9E1D5"/>
-      <rect x="452" y="337" width="296" height="92" rx="12" fill="#B44D32"/>
-      <rect x="840" y="337" width="296" height="92" rx="12" fill="#E9E1D5"/>
-      <g font-size="48" font-weight="600" text-anchor="middle">
-        <text x="212" y="400" fill="#242E2C">素材</text>
-        <text x="600" y="400" fill="#FFFFFF">作品</text>
-        <text x="988" y="400" fill="#242E2C">分发</text>
+    <g id="editorial-title">
+      <text x="48" y="209" font-size="116" font-weight="800" letter-spacing="-6" fill="#111111">Rocc.</text>
+      <text x="52" y="285" font-size="58" font-weight="750" letter-spacing="-2" fill="#222222">创作工作台</text>
+      <rect x="48" y="320" width="413" height="72" rx="4" fill="#FF5B12"/>
+      <text x="66" y="371" font-size="43" font-weight="700" fill="#FFFFFF">让想法，有作品。</text>
+      <text x="52" y="445" font-size="25" fill="#555555">影像、文字、灵感与表达。</text>
+      <text x="52" y="484" font-size="25" fill="#555555">在同一个工作空间里生长。</text>
+      <g transform="translate(52 532)" font-size="20" font-weight="600" fill="#222222">
+        <text x="0" y="0">抖音</text><circle cx="62" cy="-7" r="2" fill="#FF5B12"/>
+        <text x="82" y="0">小红书</text><circle cx="165" cy="-7" r="2" fill="#FF5B12"/>
+        <text x="185" y="0">X</text>
       </g>
-      <path d="M384 383h44m-12-12 12 12-12 12 M772 383h44m-12-12 12 12-12 12" fill="none" stroke="#B44D32" stroke-width="3"/>
     </g>
-    <g id="idea-path">
-      <text x="64" y="476" font-size="22" fill="#56635F">02 / 灵感选题 · 目标路径</text>
-      <g font-size="44" font-weight="600" fill="#315F53" text-anchor="middle">
-        <text x="212" y="541">灵感</text>
-        <text x="600" y="541">选题</text>
-        <text x="988" y="541">内容</text>
+    <g id="desk-background">
+      <circle cx="885" cy="304" r="217" fill="#FF5B12"/>
+      <path d="M621 169h35 M638 152v34" stroke="#222222" stroke-width="3"/>
+      <circle cx="1123" cy="469" r="6" fill="#FF5B12"/>
+      <path d="M665 546H1110" stroke="#DDDDDD" stroke-width="1.5"/>
+      <text x="1110" y="573" text-anchor="end" font-size="16" letter-spacing="3" fill="#767676">A DESK FOR WHAT’S NEXT.</text>
+    </g>
+    <g id="document-card" transform="rotate(9 958 267)">
+      <rect x="824" y="112" width="276" height="328" rx="9" fill="#111111" opacity=".1" transform="translate(6 8)"/>
+      <rect x="824" y="112" width="276" height="328" rx="9" fill="#FFFFFF" stroke="#D8D8D8" stroke-width="1.5"/>
+      <text x="848" y="149" font-size="15" letter-spacing="2" fill="#666666">NOTES / DRAFT 01</text>
+      <rect x="848" y="171" width="48" height="5" fill="#FF5B12"/>
+      <text x="903" y="219" font-size="32" font-weight="750" fill="#222222">观察成文</text>
+      <text x="903" y="263" font-size="32" font-weight="750" fill="#222222">观点入库</text>
+      <path d="M848 293H1068 M848 311H1068 M848 329H1008" stroke="#D6D6D6" stroke-width="5"/>
+      <rect x="848" y="356" width="222" height="48" rx="3" fill="#F3F3F3"/>
+      <text x="861" y="387" font-size="18" fill="#555555">文字稿 / 作品资料</text>
+    </g>
+    <g id="video-card" transform="rotate(-8 771 319)">
+      <rect x="639" y="161" width="272" height="338" rx="12" fill="#111111" opacity=".12" transform="translate(6 10)"/>
+      <rect x="639" y="161" width="272" height="338" rx="12" fill="#222222"/>
+      <circle cx="660" cy="182" r="3" fill="#FF5B12"/>
+      <text x="673" y="187" font-size="13" letter-spacing="1.5" fill="#FFFFFF">FRAME / 001</text>
+      <rect x="655" y="205" width="240" height="238" rx="4" fill="#111111"/>
+      <rect x="655" y="205" width="240" height="238" rx="4" fill="url(#media-hatch)"/>
+      <path d="M655 397 895 205V309L730 443H655Z" fill="#FF5B12"/>
+      <text x="673" y="276" font-size="45" font-weight="800" letter-spacing="-1" fill="#FFFFFF">MAKE</text>
+      <text x="673" y="326" font-size="45" font-weight="800" letter-spacing="-1" fill="#FFFFFF">IT</text>
+      <text x="673" y="376" font-size="45" font-weight="800" letter-spacing="-1" fill="#FFFFFF">YOURS.</text>
+      <path d="M660 469H887" stroke="#555555" stroke-width="3"/>
+      <path d="M660 469H796" stroke="#FF5B12" stroke-width="3"/>
+      <circle cx="796" cy="469" r="4" fill="#FFFFFF"/>
+    </g>
+    <g id="idea-card" transform="rotate(5 1000 442)">
+      <rect x="866" y="369" width="270" height="165" rx="5" fill="#111111" opacity=".1" transform="translate(4 6)"/>
+      <rect x="866" y="369" width="270" height="165" rx="5" fill="#FFE548"/>
+      <path d="M1098 383v26 M1085 396h26 M1089 387l18 18 M1089 405l18-18" stroke="#222222" stroke-width="2"/>
+      <text x="886" y="405" font-size="15" letter-spacing="2" fill="#3D3D3D">IDEA IN PROGRESS</text>
+      <text x="886" y="451" font-size="31" font-weight="750" fill="#111111">下一个选题？</text>
+      <path d="M886 472H1053" stroke="#111111" stroke-width="1.5"/>
+      <text x="886" y="506" font-size="19" fill="#333333">观察 / 观点 / 好奇心</text>
+    </g>
+    <g id="capability-rail">
+      <path d="M0 610H1200V680H0Z" fill="#111111"/>
+      <g font-size="23" font-weight="550" fill="#FFFFFF">
+        <text x="66" y="654">影像制作</text>
+        <text x="365" y="654">文字归档</text>
+        <text x="666" y="654">灵感研究</text>
+        <text x="967" y="654">多端表达</text>
       </g>
-      <path d="M384 525h44m-12-12 12 12-12 12 M772 525h44m-12-12 12 12-12 12" fill="none" stroke="#315F53" stroke-width="3"/>
+      <g fill="#FF5B12"><circle cx="48" cy="646" r="3"/><circle cx="347" cy="646" r="3"/><circle cx="648" cy="646" r="3"/><circle cx="949" cy="646" r="3"/></g>
+      <path d="M300 633V658 M600 633V658 M900 633V658" stroke="#464646"/>
     </g>
-    <path d="M64 575H1136" stroke="#CBC8BE" stroke-width="2"/>
-    <text x="64" y="612" font-size="22" fill="#56635F">素材留在本地 / 规范与工作流持续沉淀</text>
-    <text x="1136" y="612" font-size="22" text-anchor="end" fill="#56635F">当前能力见下方说明</text>
   </g>
 </svg>

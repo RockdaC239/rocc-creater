@@ -1,0 +1,68 @@
+{
+  "width": 1200,
+  "fps": 30,
+  "duration": 5.4,
+  "colors": 256,
+  "dither": "none",
+  "clip_to_base_alpha": true,
+  "max_size_mb": 3.0,
+  "layers": [
+    {
+      "id": "document-card",
+      "enter": {
+        "start": 0.15,
+        "end": 1.05,
+        "from": [
+          32,
+          22
+        ]
+      },
+      "exit": {
+        "start": 4.35,
+        "end": 5.25,
+        "to": [
+          16,
+          10
+        ]
+      }
+    },
+    {
+      "id": "video-card",
+      "enter": {
+        "start": 0.35,
+        "end": 1.25,
+        "from": [
+          -32,
+          22
+        ]
+      },
+      "exit": {
+        "start": 4.35,
+        "end": 5.25,
+        "to": [
+          -16,
+          10
+        ]
+      }
+    },
+    {
+      "id": "idea-card",
+      "enter": {
+        "start": 0.55,
+        "end": 1.45,
+        "from": [
+          20,
+          26
+        ]
+      },
+      "exit": {
+        "start": 4.35,
+        "end": 5.25,
+        "to": [
+          10,
+          12
+        ]
+      }
+    }
+  ]
+}
