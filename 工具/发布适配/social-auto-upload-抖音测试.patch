@@ -1,0 +1,130 @@
+diff --git a/uploader/douyin_uploader/main.py b/uploader/douyin_uploader/main.py
+index f6ac2be..40ddec2 100644
+--- a/uploader/douyin_uploader/main.py
++++ b/uploader/douyin_uploader/main.py
+@@ -10,3 +10,3 @@ from pathlib import Path
+-from patchright.async_api import Page
+-from patchright.async_api import Playwright
+-from patchright.async_api import async_playwright
++from playwright.async_api import Page
++from playwright.async_api import Playwright
++from playwright.async_api import async_playwright
+@@ -16 +15,0 @@ from uploader.base_video import BaseVideoUploader
+-from utils.base_social_media import set_init_script
+@@ -117 +116 @@ async def cookie_auth(account_file):
+-    launch_kwargs = {"headless": use_headless, "channel": "chromium", "args": ["--no-sandbox", "--disable-blink-features=AutomationControlled"]}
++    launch_kwargs = {"headless": use_headless, "channel": "chrome"}
+@@ -123 +121,0 @@ async def cookie_auth(account_file):
+-                context = await set_init_script(context)
+@@ -279 +277 @@ async def douyin_cookie_gen(
+-            browser = await playwright.chromium.launch(headless=headless, channel="chromium")
++            browser = await playwright.chromium.launch(headless=headless, channel="chrome")
+@@ -282 +279,0 @@ async def douyin_cookie_gen(
+-        context = await set_init_script(context)
+@@ -353,2 +349,0 @@ class DouYinBaseUploader(BaseVideoUploader):
+-        if not await cookie_auth(self.account_file):
+-            raise RuntimeError(f"cookie文件已失效，请先完成抖音登录: {self.account_file}")
+@@ -870,2 +865 @@ class DouYinVideo(DouYinBaseUploader):
+-            douyin_logger.warning(_msg("⚠️", "封面弹窗打不开，跳过自定义封面继续发布（交给推荐封面兜底）"))
+-            return
++            raise RuntimeError("封面弹窗打不开，停止发布")
+@@ -968 +962 @@ class DouYinVideo(DouYinBaseUploader):
+-            douyin_logger.warning(_msg("⚠️", "封面弹窗未能关闭，可能挡住自主声明/发布"))
++            raise RuntimeError("封面保存未确认，停止发布")
+@@ -976 +970 @@ class DouYinVideo(DouYinBaseUploader):
+-        browser = await playwright.chromium.launch(headless=self.headless, channel="chromium", args=["--no-sandbox", "--disable-blink-features=AutomationControlled"])
++        browser = await playwright.chromium.launch(headless=self.headless, channel="chrome")
+@@ -981 +974,0 @@ class DouYinVideo(DouYinBaseUploader):
+-        context = await set_init_script(context)
+@@ -1004,21 +997,4 @@ class DouYinVideo(DouYinBaseUploader):
+-        while True:
+-            try:
+-                await page.wait_for_url(
+-                    "https://creator.douyin.com/creator-micro/content/publish?enter_from=publish_page",
+-                    timeout=3000,
+-                )
+-                douyin_logger.info(_msg("🥳", "已经进入 version_1 发布页面"))
+-                break
+-            except Exception:
+-                try:
+-                    await page.wait_for_url(
+-                        "https://creator.douyin.com/creator-micro/content/post/video?enter_from=publish_page",
+-                        timeout=3000,
+-                    )
+-                    douyin_logger.info(_msg("🥳", "已经进入 version_2 发布页面"))
+-                    break
+-                except Exception:
+-                    douyin_logger.debug(_msg("🧍", "还没进到视频发布页面，小人继续等一会"))
+-                    await asyncio.sleep(0.5)
+-
+-        await asyncio.sleep(1)
++        await page.wait_for_url(
++            lambda url: "/content/publish" in url or "/content/post/video" in url,
++            timeout=90000,
++        )
+@@ -1049,4 +1024,0 @@ class DouYinVideo(DouYinBaseUploader):
+-        # 自主声明：本项目成片含 AI 生成内容（TTS 配音 / AI 字幕 / AI 前贴片），
+-        # 按平台合规如实选「内容由AI生成」（与转载等并列，单选，无二级选项、无需填来源）。
+-        if not self.declaration:
+-            self.declaration = "内容由AI生成"
+@@ -1062,5 +1033,0 @@ class DouYinVideo(DouYinBaseUploader):
+-        third_part_element = '[class^="info"] > [class^="first-part"] div div.semi-switch'
+-        if await page.locator(third_part_element).count():
+-            if "semi-switch-checked" not in await page.eval_on_selector(third_part_element, "div => div.className"):
+-                await page.locator(third_part_element).locator("input.semi-switch-native-control").click()
+-
+@@ -1070,47 +1037,2 @@ class DouYinVideo(DouYinBaseUploader):
+-        sms_prompt_logged = False
+-        while True:
+-            try:
+-                # 移除会拦截发布按钮点击的新手引导/话题下拉浮层
+-                await page.evaluate(
+-                    "() => { document.querySelectorAll('.shepherd-element, .shepherd-modal-overlay-container, [class*=\"mention-wrapper\"]').forEach(e => e.remove()); }"
+-                )
+-                # 检测并处理短信验证码弹窗
+-                sms_input = page.locator('input[placeholder*="验证码"], input[type="tel"], input[placeholder*="短信"], input[placeholder*="手机号"]').first
+-                if await sms_input.count() and await sms_input.is_visible():
+-                    douyin_logger.warning(_msg("📱", "检测到短信验证码弹窗"))
+-                    # 点击「获取验证码」按钮（仅首次）
+-                    get_code_btn = page.get_by_text("获取验证码").first
+-                    if await get_code_btn.count() and await get_code_btn.is_visible():
+-                        await get_code_btn.click()
+-                        douyin_logger.info(_msg("📤", "已点击「获取验证码」，请查看手机短信"))
+-                    code_file = os.path.join(BASE_DIR, "verify_code.txt")
+-                    code = await _read_verify_code(code_file)
+-                    if code:
+-                        sms_prompt_logged = False
+-                        await self._submit_sms_verify_code(page, sms_input, code, code_file)
+-                    elif not sms_prompt_logged:
+-                        douyin_logger.warning(_msg("⏳", f"等待验证码输入；可在交互终端直接输入，或写入文件: {code_file}"))
+-                        sms_prompt_logged = True
+-
+-                # ── 正常发布流程 ──
+-                publish_button = page.get_by_role("button", name="发布", exact=True)
+-                if await publish_button.count():
+-                    await publish_button.click(force=True)
+-                await page.wait_for_url(
+-                    "https://creator.douyin.com/creator-micro/content/manage**",
+-                    timeout=3000,
+-                )
+-                douyin_logger.success(_msg("🥳", "视频发布成功，小人开心收工"))
+-                break
+-            except Exception:
+-                await self.handle_auto_video_cover(page)
+-                douyin_logger.info(_msg("🏃", "小人正在冲刺发布视频"))
+-                if self.debug:
+-                    await page.screenshot(full_page=True)
+-                await asyncio.sleep(0.5)
+-
+-        await context.storage_state(path=self.account_file)
+-        douyin_logger.success(_msg("🥳", "cookie 更新完毕"))
+-        await asyncio.sleep(2)
+-        await context.close()
+-        await browser.close()
++        # The workspace entry verifies visibility and handles a single confirmed submission.
++        return page
+@@ -1235 +1157 @@ class DouYinNote(DouYinBaseUploader):
+-        browser = await playwright.chromium.launch(headless=self.headless, channel="chromium", args=["--no-sandbox", "--disable-blink-features=AutomationControlled"])
++        browser = await playwright.chromium.launch(headless=self.headless, channel="chrome")
+@@ -1240 +1161,0 @@ class DouYinNote(DouYinBaseUploader):
+-        context = await set_init_script(context)
