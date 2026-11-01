@@ -1,0 +1,53 @@
+{
+  "canvas": [
+    1917,
+    2556
+  ],
+  "font": "~/.cache/rocc-edit/UnboundedSans-Regular.otf",
+  "font_source": "https://github.com/maoken-fonts/unbounded-sans",
+  "reference": "封面参考.jpg",
+  "reference_text": "生意惨淡",
+  "boxes": [
+    [
+      179,
+      298,
+      855,
+      834
+    ],
+    [
+      1031,
+      298,
+      1736,
+      853
+    ],
+    [
+      189,
+      1709,
+      879,
+      2255
+    ],
+    [
+      1029,
+      1704,
+      1741,
+      2261
+    ]
+  ],
+  "fill": "#ffffff",
+  "background_fit": "xMidYMid slice",
+  "xingtu": {
+    "font_size": 104,
+    "shadow_transparency": 40,
+    "shadow_blur": 85,
+    "shadow_distance": 5,
+    "shadow_angle": -35,
+    "shadow_color": "#000000"
+  },
+  "shadow": {
+    "opacity": 0.6,
+    "std_deviation": 30,
+    "dx": 7.3,
+    "dy": 5.1
+  },
+  "shadow_status": "透明度按透明40%解释；模糊和距离为初始视觉换算，尚未确认与醒图一致"
+}
