@@ -1,0 +1,24 @@
+{
+  "ratio": "3:4",
+  "model": "birefnet-portrait",
+  "previewWidth": 680,
+  "title": {
+    "font": "~/.cache/rocc-edit/UnboundedSans-Regular.otf",
+    "fontIndex": 0,
+    "color": "#FF9A10",
+    "x": 0.49,
+    "yOffset": 0,
+    "size": 0.229,
+    "overlapDepth": 0.24,
+    "minVisiblePerGlyph": 0.73
+  },
+  "subtitle": {
+    "font": "/System/Library/Fonts/Hiragino Sans GB.ttc",
+    "fontIndex": 2,
+    "color": "#FFFFFF",
+    "xOffset": 0,
+    "y": 0.91,
+    "size": 0.065,
+    "lineHeight": 1.24
+  }
+}

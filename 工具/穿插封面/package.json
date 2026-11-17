@@ -1,0 +1,1 @@
+{"name":"rocc-layered-cover","private":true,"type":"module","scripts":{"test":"node --test"},"engines":{"node":">=22"},"dependencies":{"sharp":"0.35.5"}}
