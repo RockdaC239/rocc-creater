@@ -131,10 +131,16 @@ async function titlePlacement(layout, style, crop, head, alpha, width) {
     if (!ink.length) throw new Error('大标题字号过小，无法核验字形');
     return ink;
   }));
-  const preferred = clamp(Math.round(head.top - h * (1 - style.overlapDepth) + crop.height * style.yOffset), low, high);
+  const fixed = style.top != null;
+  const preferred = fixed ? crop.top + Math.round(crop.height * style.top) - 1 : clamp(Math.round(head.top - h * (1 - style.overlapDepth) + crop.height * style.yOffset), low, high);
   const step = Math.max(1, Math.round(crop.height * 0.003));
-  const candidates = new Set([preferred, low, high]);
-  for (let y = low; y <= high; y += step) candidates.add(y);
+  if (fixed && (preferred < low || preferred > high)) return null;
+  const candidates = new Set([preferred]);
+  if (!fixed) {
+    candidates.add(low);
+    candidates.add(high);
+    for (let y = low; y <= high; y += step) candidates.add(y);
+  }
   for (const y of [...candidates].sort((a, b) => Math.abs(a - preferred) - Math.abs(b - preferred))) {
     let covered = 0, count = 0, soft = 0;
     const visibility = positions.map(ink => {
@@ -150,7 +156,7 @@ async function titlePlacement(layout, style, crop, head, alpha, width) {
     });
     const overlap = covered / count;
     const softEdge = soft / count;
-    if (Math.min(...visibility) < style.minVisiblePerGlyph || overlap < 0.006 || softEdge > 0.045) continue;
+    if (Math.min(...visibility) < style.minVisiblePerGlyph || (!fixed && overlap < 0.006) || softEdge > 0.045) continue;
     return { x: x + 1, y: y + 1, size, overlap, visibility, softEdge, preferredY: preferred + 1, adjusted: y !== preferred };
   }
   return null;
@@ -192,6 +198,43 @@ async function portraitLayer(base, alpha, width, height) {
   return sharp(base).joinChannel(alpha, { raw: { width, height, channels: 1 } }).png().toBuffer();
 }
 
+async function detectPeople(base) {
+  const source = await readFile(join(here, 'detect-people.swift'));
+  const version = createHash('sha256').update(source).digest('hex').slice(0, 16);
+  const folder = join(homedir(), '.cache/rocc-edit');
+  const binary = join(folder, `cover-detect-${version}`);
+  await mkdir(folder, { recursive: true });
+  try {
+    await readFile(binary);
+  } catch (error) {
+    if (error.code !== 'ENOENT') throw error;
+    console.error('[人物检测] 首次编译本地 Apple Vision 检测器');
+    const build = spawnSync('swiftc', [join(here, 'detect-people.swift'), '-o', binary], { encoding: 'utf8' });
+    if (build.status !== 0) throw new Error(`无法编译人物检测器，请安装 Xcode Command Line Tools：${build.stderr || build.error?.message}`);
+  }
+  const temp = await mkdtemp(join(tmpdir(), 'cover-detect-'));
+  try {
+    const input = join(temp, 'image.png');
+    await writeFile(input, base);
+    const result = spawnSync(binary, [input], { encoding: 'utf8' });
+    if (result.status !== 0) throw new Error(result.stderr || result.error?.message || '人物检测失败');
+    return JSON.parse(result.stdout);
+  } finally {
+    await rm(temp, { recursive: true, force: true });
+  }
+}
+
+function intersectsPeople(pixels, width, height, boxes) {
+  return boxes.some(box => {
+    for (let y = Math.max(0, Math.floor(box.top)); y < Math.min(height, Math.ceil(box.bottom)); y++) {
+      for (let x = Math.max(0, Math.floor(box.left)); x < Math.min(width, Math.ceil(box.right)); x++) {
+        if (pixels[(y * width + x) * 4 + 3] >= 128) return true;
+      }
+    }
+    return false;
+  });
+}
+
 async function render() {
   const { values, positionals } = parseArgs({ allowPositionals: true, options: {
     ratio: { type: 'string' }, config: { type: 'string' }, model: { type: 'string' },
@@ -215,6 +258,7 @@ async function render() {
   const previewWidth = custom.previewWidth ?? template.previewWidth;
   setting(previewWidth, 100, 4000, 'previewWidth');
   if (!Number.isInteger(previewWidth)) throw new Error('previewWidth 必须为整数');
+  if (style.top != null) setting(style.top, 0, 0.4, 'title.top');
   setting(style.x, 0, 1, 'title.x');
   setting(style.yOffset, -1, 1, 'title.yOffset');
   setting(style.overlapDepth, 0, 1, 'title.overlapDepth');
@@ -227,6 +271,10 @@ async function render() {
   const reference = await json(join(here, '../封面版式.json'));
   const shadow = { ...reference.shadow, ...custom.shadow };
   setting(shadow.opacity, 0, 1, 'shadow.opacity');
+  const subtitleShadow = { ...shadow, opacity: subStyle.shadowOpacity ?? shadow.opacity,
+    std_deviation: subStyle.shadowBlur ?? shadow.std_deviation };
+  setting(subtitleShadow.opacity, 0, 1, 'subtitle.shadowOpacity');
+  setting(subtitleShadow.std_deviation, 0.1, 300, 'subtitle.shadowBlur');
   setting(shadow.std_deviation, 0.1, 300, 'shadow.std_deviation');
   setting(shadow.dx, -300, 300, 'shadow.dx');
   setting(shadow.dy, -300, 300, 'shadow.dy');
@@ -240,54 +288,81 @@ async function render() {
   cropFor(width, height, ratio, { top: 0, left: 0, headBottom: 1, right: 1 });
   const fonts = JSON.parse(python(['glyphs'], JSON.stringify([{ ...style, text: title }, { ...subStyle, text: subtitle }])));
 
+  const layout = line(title, fonts[0]);
+  const centered = { top: Math.floor(height / 2), headBottom: Math.floor(height / 2) + 1,
+    left: Math.floor(width / 2), right: Math.floor(width / 2) + 1 };
+  const initialCrop = cropFor(width, height, ratio, centered);
+  let detection = null;
+  let needsMask = true;
+  if (style.top != null && !values.mask) {
+    const initialTitle = await titlePlacement(layout, style, initialCrop, { headBottom: height },
+      Buffer.alloc(width * height), width);
+    if (!initialTitle) throw new Error('固定标题位置超出安全区，请调整 title.top 或 title.size');
+    const ink = await sharp(Buffer.from(svg(width, height,
+      paths(layout, initialTitle.size, initialTitle.x, initialTitle.y).join(''))))
+      .ensureAlpha().raw().toBuffer();
+    detection = await detectPeople(base);
+    needsMask = intersectsPeople(ink, width, height, detection);
+    console.error(`[人物检测] ${detection.length ? '检测到人物区域' : '未检测到人物'} · ${needsMask ? '与标题重叠，读取或生成蒙版' : '未与标题重叠，直接合成'}`);
+  }
+
   const cache = resolve(values['cache-dir'] || join(homedir(), '.cache/rocc-edit/cover-masks'));
   const key = createHash('sha256').update(`cover-mask-v1:rembg-2.0.87:${model}:`).update(source).digest('hex');
-  const maskPath = values.mask ? resolve(values.mask) : join(cache, `${key}.png`);
+  const maskPath = !needsMask ? null : values.mask ? resolve(values.mask) : join(cache, `${key}.png`);
   let mask, maskSource = values.mask ? 'manual' : 'cache';
-  try {
-    mask = await readFile(maskPath);
-  } catch (error) {
-    if (error.code !== 'ENOENT' || values.mask) throw error;
-    if (values['render-only']) throw new Error('缓存缺失。先完整执行一次、指定正确缓存位置或传入 --mask');
-    await mkdir(cache, { recursive: true });
-    const temp = await mkdtemp(join(tmpdir(), 'cover-model-'));
+  if (needsMask) {
     try {
-      const path = join(temp, 'original.png');
-      await writeFile(path, base);
-      console.error(`[抠图] ${width}×${height} · ${model} · 本地 CPU`);
-      python(['mask', path, maskPath, model]);
       mask = await readFile(maskPath);
-      maskSource = 'generated';
-    } finally {
-      await rm(temp, { recursive: true, force: true });
+    } catch (error) {
+      if (error.code !== 'ENOENT' || values.mask) throw error;
+      if (values['render-only']) throw new Error('缓存缺失。先完整执行一次、指定正确缓存位置或传入 --mask');
+      await mkdir(cache, { recursive: true });
+      const temp = await mkdtemp(join(tmpdir(), 'cover-model-'));
+      try {
+        const path = join(temp, 'original.png');
+        await writeFile(path, base);
+        console.error(`[抠图] ${width}×${height} · ${model} · 本地 CPU`);
+        python(['mask', path, maskPath, model]);
+        mask = await readFile(maskPath);
+        maskSource = 'generated';
+      } finally {
+        await rm(temp, { recursive: true, force: true });
+      }
     }
+  } else {
+    maskSource = 'skipped';
+    mask = await sharp(Buffer.alloc(width * height), { raw: { width, height, channels: 1 } }).png().toBuffer();
   }
-  console.error(`[蒙版] ${maskSource} · ${maskPath}`);
+  if (needsMask) console.error(`[蒙版] ${maskSource} · ${maskPath}`);
   const meta = await sharp(mask).metadata();
   if (meta.format !== 'png' || meta.width !== width || meta.height !== height || meta.hasAlpha) {
     throw new Error(`蒙版须为无透明通道的灰度 PNG，尺寸必须与校正方向后的原图一致（${width}×${height}）`);
   }
   const alpha = await sharp(mask).toColourspace('b-w').raw().toBuffer();
-  const head = portraitBounds(alpha, width, height);
-  const crop = cropFor(width, height, ratio, head);
-  const layout = line(title, fonts[0]);
-  let titleFit = await titlePlacement(layout, style, crop, head, alpha, width);
+  const head = needsMask ? portraitBounds(alpha, width, height) : null;
+  const crop = style.top != null ? initialCrop : cropFor(width, height, ratio, head);
+  let titleFit = await titlePlacement(layout, style, crop, head ?? { headBottom: height }, alpha, width);
   const preferredCropTop = crop.top;
-  if (!titleFit) {
+  if (!titleFit && style.top == null) {
     const highCrop = Math.max(0, head.headBottom - crop.height, Math.round(head.top - crop.width * 0.18));
     if (highCrop < crop.top) {
       crop.top = highCrop;
-      titleFit = await titlePlacement(layout, style, crop, head, alpha, width);
+      titleFit = await titlePlacement(layout, style, crop, head ?? { headBottom: height }, alpha, width);
       if (titleFit) console.error('[裁切] 已上移裁切窗口，为标题保留头顶空间');
     }
   }
   if (!titleFit) {
     throw new Error('自动重排后仍无法同时实现穿插和保留字形，或发缘半透明像素过多。请调整 title.x/size、选择留白更多的照片或精修蒙版');
   }
+  const warnings = [];
+  if (needsMask && titleFit.overlap < 0.006) {
+    warnings.push('固定标题位置与人像交叠较少，请检查预览中的穿插效果');
+    console.error('[预览提示] ' + warnings[0]);
+  }
   const subtitleFit = subtitlePaths(subtitle, fonts[1], subStyle, crop, titleFit, titleFit.y + titleFit.size * (layout.top - layout.bottom));
   const scale = crop.width / reference.canvas[0];
   const titleSvg = layer(width, height, paths(layout, titleFit.size, titleFit.x, titleFit.y).join(''), style.color, shadow, scale);
-  const subtitleSvg = layer(width, height, subtitleFit.elements.join(''), subStyle.color, shadow, scale);
+  const subtitleSvg = layer(width, height, subtitleFit.elements.join(''), subStyle.color, subtitleShadow, scale);
   const { data: titlePixels, info: titleInfo } = await sharp(Buffer.from(titleSvg)).ensureAlpha().raw()
     .toBuffer({ resolveWithObject: true });
   const overlayMask = Buffer.from(alpha);
@@ -295,19 +370,20 @@ async function render() {
   for (let i = 0; i < overlayMask.length; i++) {
     if (!titlePixels[i * 4 + 3]) overlayMask[i] = 0;
   }
-  const portrait = await portraitLayer(base, alpha, width, height);
+  const portrait = needsMask ? await portraitLayer(base, alpha, width, height) : null;
   const composite = await sharp(base).composite([
     { input: titlePixels, raw: { width, height, channels: titleInfo.channels } },
-    { input: await portraitLayer(base, overlayMask, width, height) },
+    ...(needsMask ? [{ input: await portraitLayer(base, overlayMask, width, height) }] : []),
     { input: Buffer.from(subtitleSvg) },
   ]).png().toBuffer();
   const final = await sharp(composite).extract(crop).png().toBuffer();
   const report = {
-    model, maskSource, maskPath, ratio, text: { title, subtitle }, sourceSize: { width, height }, crop, preferredCropTop, estimatedHead: head,
+    model, maskSource, maskPath, detection, needsMask, ratio, text: { title, subtitle }, sourceSize: { width, height }, crop, preferredCropTop, estimatedHead: head,
     overlap: titleFit.overlap, visibilityPerGlyph: titleFit.visibility, softEdgeFraction: titleFit.softEdge,
     title: { x: titleFit.x, y: titleFit.y, size: titleFit.size, preferredY: titleFit.preferredY, adjusted: titleFit.adjusted },
     subtitle: { size: subtitleFit.size, lines: subtitleFit.lines, x: subtitleFit.x, bottomMargin: subtitleFit.bottomMargin },
-    review: '自动检查通过。请打开预览确认标题语义可读、五官完整、交叠处发丝自然。',
+    warnings,
+    review: '布局检查通过。请打开预览确认标题语义可读、五官完整、交叠处发丝自然。',
   };
   const preview = await sharp(final).resize({ width: previewWidth, withoutEnlargement: true }).png().toBuffer();
   const target = resolve(output);
@@ -321,10 +397,10 @@ async function render() {
   await Promise.all([
     writeFile(join(target, 'cover.png'), final),
     writeFile(join(target, 'preview.png'), preview),
-    writeFile(join(target, 'portrait.png'), portrait),
+    ...(needsMask ? [writeFile(join(target, 'portrait.png'), portrait)] : []),
     writeFile(join(target, 'title.svg'), titleSvg),
     writeFile(join(target, 'subtitle.svg'), subtitleSvg),
-    writeFile(join(target, 'alpha-mask.png'), mask),
+    ...(needsMask ? [writeFile(join(target, 'alpha-mask.png'), mask)] : []),
     writeFile(join(target, 'report.json'), JSON.stringify(report, null, 2) + '\n'),
   ]);
   console.error(`[导出] ${crop.width}×${crop.height} · ${target} · ${titleFit.adjusted ? '已自动调整标题位置' : '标题首选位置通过'}`);

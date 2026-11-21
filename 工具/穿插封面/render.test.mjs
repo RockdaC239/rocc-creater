@@ -18,8 +18,10 @@ test('使用现成人像蒙版完成穿插、保留未叠字像素，并导出�
     await sharp({ create: { width, height, channels: 3, background: '#204060' } }).png().toFile(input);
     await sharp(Buffer.from('<svg width="420" height="560"><ellipse cx="210" cy="292" rx="120" ry="185" fill="white"/></svg>'))
       .flatten({ background: '#000' }).greyscale().blur(3).png().toFile(mask);
+    const autoConfig = join(root, 'auto.json');
+    await writeFile(autoConfig, JSON.stringify({ title: { top: null }, subtitle: { xOffset: 0 } }));
     const run = spawnSync(process.execPath, [fileURLToPath(new URL('render.mjs', import.meta.url)), input,
-      '生意惨淡', '本地自动合成\n快速改稿', output, '--ratio', '4:5', '--mask', mask, '--render-only'], { encoding: 'utf8' });
+      '生意惨淡', '本地自动合成\n快速改稿', output, '--config', autoConfig, '--ratio', '4:5', '--mask', mask, '--render-only'], { encoding: 'utf8' });
     assert.equal(run.status, 0, run.stderr);
     const final = join(output, 'cover.png');
     const { width: w, height: h } = await sharp(final).metadata();
@@ -70,7 +72,7 @@ test('使用现成人像蒙版完成穿插、保留未叠字像素，并导出�
     assert.ok(bottomMargin >= topMargin, '副标题底部留白不少于大标题顶部留白');
     const trial = join(root, 'trial');
     const config = join(root, 'offset.json');
-    await writeFile(config, JSON.stringify({ subtitle: { xOffset: 0.025 } }));
+    await writeFile(config, JSON.stringify({ title: { top: null }, subtitle: { xOffset: 0.025 } }));
     const shifted = spawnSync(process.execPath, [fileURLToPath(new URL('render.mjs', import.meta.url)), input,
       '生意惨淡', '原图套版\n本地完成排版\n大标题自然藏到人物身后', trial,
       '--ratio', '4:5', '--mask', mask, '--config', config], { encoding: 'utf8' });
@@ -79,12 +81,43 @@ test('使用现成人像蒙版完成穿插、保留未叠字像素，并导出�
     assert.equal(shiftedReport.subtitle.lines, 3);
     assert.equal(shiftedReport.subtitle.x - report.subtitle.x, 11);
     assert.deepEqual(shiftedReport.title, report.title);
+    const fixed = join(root, 'fixed');
+    await writeFile(config, JSON.stringify({ title: { top: 0.065 } }));
+    const anchored = spawnSync(process.execPath, [fileURLToPath(new URL('render.mjs', import.meta.url)), input,
+      '生意惨淡', '固定顶部位置', fixed, '--mask', mask, '--config', config], { encoding: 'utf8' });
+    assert.equal(anchored.status, 0, anchored.stderr);
+    const fixedReport = JSON.parse(anchored.stdout);
+    assert.equal(fixedReport.title.y - fixedReport.crop.top, 36, '顶部按560px画布的6.5%固定，不能跟随头部');
     const mtime = (await stat(final)).mtimeMs;
     const again = spawnSync(process.execPath, [fileURLToPath(new URL('render.mjs', import.meta.url)), input,
       '生意惨淡', '改稿', output, '--mask', mask], { encoding: 'utf8' });
     assert.notEqual(again.status, 0);
     assert.equal((await stat(final)).mtimeMs, mtime);
     assert.ok((await readdir(output)).includes('title.svg'));
+  } finally {
+    await rm(root, { recursive: true, force: true });
+  }
+});
+
+test('无人照片固定标题直接合成，render-only 无需蒙版缓存', async () => {
+  const root = await mkdtemp(join(tmpdir(), 'cover-no-person-'));
+  try {
+    const input = join(root, 'empty.png');
+    const output = join(root, 'out');
+    await sharp({ create: { width: 420, height: 560, channels: 3, background: '#204060' } }).png().toFile(input);
+    const run = spawnSync(process.execPath, [fileURLToPath(new URL('render.mjs', import.meta.url)), input,
+      '教培新机', '无人照片也能制作封面', output, '--cache-dir', join(root, 'no-cache'), '--render-only'], { encoding: 'utf8' });
+    assert.equal(run.status, 0, run.stderr);
+    const report = JSON.parse(run.stdout);
+    assert.deepEqual(report.detection, []);
+    assert.equal(report.needsMask, false);
+    assert.equal(report.maskSource, 'skipped');
+    assert.equal(report.maskPath, null);
+    assert.equal(report.title.y, 36);
+    const files = await readdir(output);
+    assert.ok(files.includes('cover.png'));
+    assert.ok(!files.includes('alpha-mask.png') && !files.includes('portrait.png'));
+    assert.ok(!run.stderr.includes('[抠图]'));
   } finally {
     await rm(root, { recursive: true, force: true });
   }
